@@ -3,7 +3,6 @@
 # Script untuk konfigurasi server dengan root privileges
 # Script ini akan menggunakan sudo untuk setiap perintah yang memerlukan root privileges
 
-
 echo "=== Starting server configuration ==="
 
 # Install nano
@@ -218,8 +217,9 @@ echo "exclude=cockpit* cloud-init*" | tee -a /etc/dnf/dnf.conf
 echo "=== Setting Timezone ==="
 # Set timezone to Asia/Jakarta
 sudo timedatectl set-timezone Asia/Jakarta
-sudo timedatectl set-ntp on
+sudo timedatectl set-ntp true
+sudo systemctl restart chronyd
 
 echo "=== Configuration completed successfully ==="
 echo "Current timezone:"
-timedatectl status
+sudo timedatectl status
