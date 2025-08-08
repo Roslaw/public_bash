@@ -117,7 +117,7 @@ if [ "${INTERFACES[1]}" ]; then
     INTERFACE2="${INTERFACES[1]}"
     MAC2=$(ip link show $INTERFACE2 | awk '/ether/ {print $2}')
     
-    echo "Creating ifcfg-$INTERFACE2 (DHCP)..."
+    echo "Creating ifcfg-$INTERFACE2 (DHCP) with MAC: $MAC2"
     sudo tee /etc/sysconfig/network-scripts/ifcfg-$INTERFACE2 > /dev/null <<EOF
 TYPE=Ethernet
 HWADDR=$MAC2
