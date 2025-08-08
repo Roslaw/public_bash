@@ -3,6 +3,7 @@
 # Script untuk konfigurasi server dengan root privileges
 # Script ini akan menggunakan sudo untuk setiap perintah yang memerlukan root privileges
 
+
 echo "=== Starting server configuration ==="
 
 # Install nano
