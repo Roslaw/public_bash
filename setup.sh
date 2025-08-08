@@ -113,11 +113,11 @@ INTERFACES=($(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -3))
 echo "Detected interfaces: ${INTERFACES[@]}"
 
 # Create ifcfg for second interface (index 1) - DHCP
-if [ "${INTERFACES[1]}" ]; then
-    INTERFACE2="${INTERFACES[1]}"
+if [ "${INTERFACES[0]}" ]; then
+    INTERFACE2="${INTERFACES[0]}"
     MAC2=$(ip link show $INTERFACE2 | awk '/ether/ {print $2}')
     
-    echo "Creating ifcfg-$INTERFACE2 (DHCP) with MAC: $MAC2"
+    echo "Creating ifcfg-$INTERFACE2 (DHCP)..."
     sudo tee /etc/sysconfig/network-scripts/ifcfg-$INTERFACE2 > /dev/null <<EOF
 TYPE=Ethernet
 HWADDR=$MAC2
@@ -145,8 +145,8 @@ EOF
 fi
 
 # Create ifcfg for third interface (index 2) - Static IP
-if [ "${INTERFACES[2]}" ]; then
-    INTERFACE3="${INTERFACES[2]}"
+if [ "${INTERFACES[1]}" ]; then
+    INTERFACE3="${INTERFACES[1]}"
     MAC3=$(ip link show $INTERFACE3 | awk '/ether/ {print $2}')
     
     echo "Creating ifcfg-$INTERFACE3 (Static IP)..."
