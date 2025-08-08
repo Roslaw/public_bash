@@ -190,9 +190,26 @@ sudo tee -a /etc/hosts > /dev/null <<EOF
 172.30.20.22    node-worker-3
 EOF
 
-echo "/etc/hosts file updated with cluster nodes."
 echo "Current /etc/hosts content:"
 cat /etc/hosts
+
+echo "=== Configuring DNS resolution (/etc/resolv.conf) ==="
+sudo rm -rf /etc/resolv.conf
+
+# Create new resolv.conf with Cloudflare and Google DNS
+echo "Creating new /etc/resolv.conf with Cloudflare and Google DNS..."
+sudo tee /etc/resolv.conf > /dev/null <<EOF
+# Custom DNS configuration
+# Cloudflare DNS (Primary)
+nameserver 1.1.1.1
+nameserver 1.0.0.1
+
+# Google DNS (Secondary)
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+
+cat /etc/resolv.conf
 
 echo "=== Adding package exclusion to DNF ==="
 # Add exclusion to DNF config
