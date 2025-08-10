@@ -41,7 +41,7 @@ fi
 
 echo "SSH configuration updated."
 
-echo "=== Stopping Cloud-Init and Cockpit services ==="
+echo "=== Stopping Cloud-Init, Network Manager and Cockpit services ==="
 # Stop services
 sudo systemctl stop cloud-config.service \
   cloud-final.service \
@@ -51,6 +51,10 @@ sudo systemctl stop cloud-config.service \
   cloud-init-hotplugd.socket \
   cloud-config.target \
   cloud-init.target \
+  nm-cloud-setup.service \
+  nm-cloud-setup.timer \
+  cockpit.socket \
+  cockpit.service \
   cockpit 2>/dev/null || echo "Some services may not exist, continuing..."
 
 # Disable services
@@ -62,6 +66,10 @@ sudo systemctl disable cloud-config.service \
   cloud-init-hotplugd.socket \
   cloud-config.target \
   cloud-init.target \
+  nm-cloud-setup.service \
+  nm-cloud-setup.timer \
+  cockpit.socket \
+  cockpit.service \
   cockpit 2>/dev/null || echo "Some services may not exist, continuing..."
 
 # Mask services
@@ -73,12 +81,15 @@ sudo systemctl mask cloud-config.service \
   cloud-init-hotplugd.socket \
   cloud-config.target \
   cloud-init.target \
+  nm-cloud-setup.service \
+  nm-cloud-setup.timer \
   cockpit.socket \
-  cockpit.service 2>/dev/null || echo "Some services may not exist, continuing..."
+  cockpit.service \
+  cockpit 2>/dev/null || echo "Some services may not exist, continuing..."
 
 echo "=== Removing Cloud-Init and Cockpit packages ==="
 # Remove packages
-sudo dnf remove cloud* cockpit* -y
+sudo dnf remove cloud* cockpit* nm-cloud-setup* -y
 sudo dnf autoremove -y
 
 echo "=== Cleaning up Cloud-Init and Cockpit files ==="
@@ -95,10 +106,17 @@ sudo rm -rf /etc/issue.d/cockpit.issue
 sudo rm -rf /etc/motd.d/cockpit
 sudo rm -rf /usr/lib/tmpfiles.d/cockpit-ws.conf
 
+echo "=== Deep cleaning: Removing all cloud-init related files system-wide ==="
+sudo find / \( -path /proc -o -path /sys -o -path /run -o -path /dev \) -prune -o \
+  -depth \( -iname '*cloud-init*' -o -iname '*coud-init*' \) -exec rm -rfv -- {} + 2>/dev/null
+
+echo "Deep cleanup of cloud-init files completed."
+
 echo "=== Cleaning up Network Configuration files ==="
 # Remove all files in NetworkManager system-connections directory
 echo "Removing NetworkManager system connections..."
 sudo rm -rf /etc/NetworkManager/system-connections/*
+sudo rm -rf /etc/NetworkManager/conf.d/*
 
 # Remove all files in network-scripts directory
 echo "Removing network scripts..."
@@ -181,6 +199,7 @@ echo "Adding cluster nodes to /etc/hosts..."
 sudo tee -a /etc/hosts > /dev/null <<EOF
 
 # Kubernetes Cluster Nodes
+172.30.20.15    rke2-api-server
 172.30.20.10    node-master-1
 172.30.20.11    node-master-2
 172.30.20.12    node-master-3
@@ -209,6 +228,17 @@ nameserver 8.8.4.4
 EOF
 
 cat /etc/resolv.conf
+
+echo "=== Configuring NetworkManager for RKE2/Canal ==="
+# Create rke2-canal.conf file
+echo "Creating /etc/NetworkManager/conf.d/rke2-canal.conf..."
+sudo tee /etc/NetworkManager/conf.d/rke2-canal.conf > /dev/null <<EOF
+[keyfile]
+unmanaged-devices=interface-name:flannel*;interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico;interface-name:vxlan-v6.calico;interface-name:wireguard.cali;interface-name:wg-v6.cali
+EOF
+
+echo "Content of /etc/NetworkManager/conf.d/rke2-canal.conf:"
+cat /etc/NetworkManager/conf.d/rke2-canal.conf
 
 echo "=== Adding package exclusion to DNF ==="
 # Add exclusion to DNF config
