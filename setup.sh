@@ -253,3 +253,5 @@ sudo systemctl restart chronyd
 echo "=== Configuration completed successfully ==="
 echo "Current timezone:"
 sudo timedatectl status
+
+#Andre Kontol
