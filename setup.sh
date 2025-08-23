@@ -151,10 +151,9 @@ NAME=$INTERFACE2
 DEVICE=$INTERFACE2
 ONBOOT=yes
 PEERDNS=no
-DNS1=1.1.1.1
-DNS2=1.0.0.1
+DNS1=10.43.0.10
+DNS2=1.1.1.1
 DNS3=8.8.8.8
-DNS4=8.8.4.4
 METRIC=100
 AUTOCONNECT_PRIORITY=120
 EOF
@@ -219,12 +218,9 @@ echo "Creating new /etc/resolv.conf with Cloudflare and Google DNS..."
 sudo tee /etc/resolv.conf > /dev/null <<EOF
 # Custom DNS configuration
 # Cloudflare DNS (Primary)
+nameserver 10.43.0.10
 nameserver 1.1.1.1
-nameserver 1.0.0.1
-
-# Google DNS (Secondary)
 nameserver 8.8.8.8
-nameserver 8.8.4.4
 EOF
 
 cat /etc/resolv.conf
